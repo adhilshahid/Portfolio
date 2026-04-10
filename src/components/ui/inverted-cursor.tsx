@@ -21,7 +21,7 @@ export const Cursor: React.FC = () => {
   const glowStyles = {
     default: `
       0 0 16px 10px rgba(230, 194, 255, 0.85),
-      0 0 20px 16px rgba(229, 194, 254, 0.55),
+      0 0 15px 10px rgba(229, 194, 254, 0.55),
       0 0 24px 24px rgba(148, 123, 171, 0.25)
     `,
     hover: `
@@ -71,7 +71,12 @@ export const Cursor: React.FC = () => {
       positionRef.current.currentY = newY;
 
       // translate(-50%, -50%) centers it automatically without JS size offsets
-      cursorRef.current.style.transform = `translate3d(${newX}px, ${newY}px, 0) translate(-50%, -50%)`;
+      // scale uses custom CSS variables to avoid overwriting movement transforms
+      cursorRef.current.style.transform = `
+        translate3d(${newX}px, ${newY}px, 0)
+        translate(-50%, -50%)
+        scale(var(--cursor-scale, 1))
+      `;
       requestRef.current = requestAnimationFrame(updateCursor);
     };
 
@@ -186,7 +191,7 @@ export const Cursor: React.FC = () => {
   return (
     <div
       ref={cursorRef}
-      className={`fixed top-0 left-0 pointer-events-none rounded-full mix-blend-difference z-50 ${cursorState === 'text' ? 'animate-pulse' : ''}`}
+      className={`fixed top-0 left-0 pointer-events-none rounded-full mix-blend-difference z-50 ${cursorState === 'text' ? 'cursor-pulse' : ''}`}
       style={{
         width: size,
         height: size,
