@@ -1,6 +1,5 @@
 import ScrollyCanvas from '@/components/ScrollyCanvas';
 import Overlay from '@/components/Overlay';
-import Projects from '@/components/Projects';
 import NanoBanana from '@/components/NanoBanana';
 
 export default function Home() {
@@ -9,7 +8,6 @@ export default function Home() {
       <ScrollyCanvas>
         <Overlay />
       </ScrollyCanvas>
-      <Projects />
       <NanoBanana />
     </main>
   );
