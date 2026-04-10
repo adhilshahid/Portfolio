@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { motion, useInView, useSpring, useTransform } from 'framer-motion';
+import { motion, useInView, useSpring, useTransform, Variants } from 'framer-motion';
 import { Server, Network, Cloud, Activity, ArrowRight, Share2, Terminal } from 'lucide-react';
 
 // Canvas Particle Network Background
@@ -171,7 +171,7 @@ export default function About() {
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: true, margin: "-100px" });
 
-  const staggerChildren = {
+  const staggerChildren: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -181,7 +181,7 @@ export default function About() {
     },
   };
 
-  const slideUp = {
+  const slideUp: Variants = {
     hidden: { opacity: 0, y: 50 },
     visible: { 
       opacity: 1, 

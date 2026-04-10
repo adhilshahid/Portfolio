@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 
 export const Cursor: React.FC = () => {
   const cursorRef = useRef<HTMLDivElement>(null);
-  const requestRef = useRef<number>();
+  const requestRef = useRef<number | null>(null);
 
   const positionRef = useRef({
     currentX: -100,
