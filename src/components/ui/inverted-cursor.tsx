@@ -20,34 +20,24 @@ export const Cursor: React.FC = () => {
   // Glow configurations
   const glowStyles = {
     default: `
-      0 0 16px 10px rgba(230, 194, 255, 0.85),
-      0 0 15px 10px rgba(229, 194, 254, 0.55),
-      0 0 24px 24px rgba(148, 123, 171, 0.25)
     `,
     hover: `
-      0 0 16px 10px rgba(230, 194, 255, 0.95),
-      0 0 20px 16px rgba(229, 194, 254, 0.65),
-      0 0 24px 24px rgba(148, 123, 171, 0.35)
+      0 0 10px 5px rgba(255, 223, 174, 0.95)
+
     `,
     text: `
-      0 0 20px 12px rgba(230, 194, 255, 0.7),
-      0 0 25px 20px rgba(229, 194, 254, 0.5),
-      0 0 28px 28px rgba(148, 123, 171, 0.2)
+      0 0 10px 5px rgba(255, 223, 174, 0.95)
+
     `,
     click: `
-      0 0 12px 8px rgba(230, 194, 255, 0.9),
-      0 0 16px 12px rgba(229, 194, 254, 0.6),
-      0 0 20px 20px rgba(148, 123, 171, 0.3)
+      0 0 10px 5px rgba(255, 223, 174, 0.95)
     `,
     disabled: `
-      0 0 8px 5px rgba(230, 194, 255, 0.4),
-      0 0 10px 8px rgba(229, 194, 254, 0.25),
-      0 0 12px 12px rgba(148, 123, 171, 0.15)
+      0 0 10px 5px rgba(255, 223, 174, 0.95)
     `,
     grab: `
-      0 0 20px 12px rgba(230, 194, 255, 0.9),
-      0 0 25px 20px rgba(229, 194, 254, 0.6),
-      0 0 32px 32px rgba(148, 123, 171, 0.3)
+      0 0 10px 5px rgba(255, 223, 174, 0.95)
+
     `
   };
 
@@ -123,7 +113,7 @@ export const Cursor: React.FC = () => {
         window.getComputedStyle(target).cursor === 'pointer'
       ) {
         setCursorState('hover');
-        setSize(70);
+        setSize(80);
         return;
       }
 
@@ -140,14 +130,14 @@ export const Cursor: React.FC = () => {
 
       // Default state
       setCursorState('default');
-      setSize(40);
+      setSize(60);
     };
 
     // Handle click state
     const handleMouseDown = () => {
       isClicking = true;
       setCursorState('click');
-      setSize(30);
+      setSize(40);
     };
 
     const handleMouseUp = (e: MouseEvent) => {
@@ -196,7 +186,7 @@ export const Cursor: React.FC = () => {
         width: size,
         height: size,
         opacity: getOpacity(),
-        backgroundColor: "#E6CEFF",
+        backgroundColor: "#fcc7b2ff",
         boxShadow: glowStyles[cursorState],
         transition: 'width 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55), height 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.3s ease-out, box-shadow 0.3s ease-out'
       }}
