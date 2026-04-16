@@ -7,7 +7,7 @@ import { Cursor } from "@/components/ui/inverted-cursor";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Scrollytelling Portfolio",
+  title: "Adhil Shahid Portfolio",
   description: "A high-end personal portfolio built with Next.js and HTML5 Canvas.",
 };
 

@@ -15,7 +15,7 @@ export default function Navbar() {
     const handleScroll = () => {
       // Transition point for the navbar
       setIsScrolled(window.scrollY > 100);
-      
+
       // Default to Home if at the very top
       if (window.scrollY < 100) {
         setActiveSection('Home');
@@ -24,7 +24,7 @@ export default function Navbar() {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll(); // Check initially
-    
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -70,7 +70,7 @@ export default function Navbar() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-    
+
     const target = document.getElementById(item.toLowerCase());
     if (target) {
       target.scrollIntoView({ behavior: 'smooth' });
@@ -97,7 +97,7 @@ export default function Navbar() {
               <span className="relative z-10 transition-transform duration-300 group-hover:scale-105 inline-block text-[11px] sm:text-xs">
                 {item}
               </span>
-              
+
               {isActive && (
                 <motion.div
                   layoutId="liquid-active-bg"
@@ -178,12 +178,13 @@ export default function Navbar() {
             >
               {/* Optional: Add public/logo.png or a generic div if not present */}
               <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-white/10 flex items-center justify-center border border-white/20">
-                <Image 
-                  src="/logo.png" 
-                  alt="Logo" 
-                  width={40} 
-                  height={40} 
+                <Image
+                  src="/logo.png"
+                  alt="Logo"
+                  width={40}
+                  height={40}
                   className="object-contain"
+                  style={{ width: 'auto', height: 'auto' }}
                   onError={(e) => {
                     // Fallback if logo not found
                     e.currentTarget.style.display = 'none';
@@ -226,7 +227,7 @@ export default function Navbar() {
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="pointer-events-auto flex items-center rounded-[50px] max-w-full relative"
           >
-             {renderNavItems()}
+            {renderNavItems()}
           </motion.nav>
         ) : null}
       </div>
