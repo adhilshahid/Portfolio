@@ -221,8 +221,8 @@ export default function Navbar() {
         {(isScrolled || typeof window !== 'undefined' && window.innerWidth < 1024 && !isScrolled) ? (
           <motion.nav
             layoutId="nav-pill"
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
+            initial={false}
+            animate={{ y: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="pointer-events-auto flex items-center rounded-[50px] max-w-full relative"
           >
