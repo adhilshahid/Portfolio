@@ -19,9 +19,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark h-full antialiased bg-[#050505]">
       <body className={`${inter.className} min-h-full flex flex-col bg-[#050505] text-white overflow-x-hidden`}>
-        <Cursor />
         <Navbar />
         {children}
+        <Cursor />
       </body>
     </html>
   );

@@ -181,13 +181,14 @@ export const Cursor: React.FC = () => {
   return (
     <div
       ref={cursorRef}
-      className={`fixed top-0 left-0 pointer-events-none rounded-full mix-blend-difference z-50 ${cursorState === 'text' ? 'cursor-pulse' : ''}`}
+      className={`fixed top-0 left-0 pointer-events-none rounded-full mix-blend-difference ${cursorState === 'text' ? 'cursor-pulse' : ''}`}
       style={{
         width: size,
         height: size,
         opacity: getOpacity(),
         backgroundColor: "#fcc7b2ff",
         boxShadow: glowStyles[cursorState],
+        zIndex: 9999,
         transition: 'width 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55), height 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.3s ease-out, box-shadow 0.3s ease-out'
       }}
       aria-hidden="true"
