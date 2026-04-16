@@ -80,7 +80,7 @@ export default function Navbar() {
   const renderNavItems = () => (
     <fieldset className="nav-glass pointer-events-auto h-[64px] sm:h-[70px]">
       <legend className="switcher__legend">Navigation Menu</legend>
-      <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar snap-x h-full">
+      <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar snap-x h-full relative z-[5]">
         {navLinks.map((item) => {
           const isActive = activeSection === item;
           // Apply active item styling purely via React instead of raw CSS input matching
@@ -118,6 +118,14 @@ export default function Navbar() {
         })}
       </div>
 
+      {/* Edge refraction highlight */}
+      <div className="absolute inset-[1px] rounded-full pointer-events-none z-[3]"
+        style={{
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 30%, transparent 70%, rgba(255,255,255,0.06) 100%)',
+        }}
+        aria-hidden="true"
+      />
+
       <div className="switcher__filter">
         <svg>
           <filter id="switcher" primitiveUnits="objectBoundingBox">
@@ -143,6 +151,11 @@ export default function Navbar() {
               xChannelSelector="R"
               yChannelSelector="G"
             ></feDisplacementMap>
+          </filter>
+          {/* Liquid glass distortion — organic turbulence-based refraction */}
+          <filter id="liquid-glass-filter" x="-5%" y="-5%" width="110%" height="110%" colorInterpolationFilters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.01 0.015" numOctaves={2} seed={3} result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale={12} xChannelSelector="R" yChannelSelector="G" />
           </filter>
         </svg>
       </div>
@@ -211,7 +224,7 @@ export default function Navbar() {
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="pointer-events-auto flex items-center glass-pill rounded-[50px] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] max-w-full relative"
+            className="pointer-events-auto flex items-center rounded-[50px] max-w-full relative"
           >
              {renderNavItems()}
           </motion.nav>

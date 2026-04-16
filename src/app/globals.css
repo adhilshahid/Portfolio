@@ -33,12 +33,10 @@ body {
   background: #404040;
 }
 
-/* Glass Pill container with fallback for Safari */
+/* Glass Pill — outer shell only, inner nav-glass handles main glass effect */
 .glass-pill {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 /* Hide scrollbar for sideways scrolling */
@@ -119,6 +117,75 @@ body {
       transparent);
   transition: background-color 400ms cubic-bezier(1, 0, 0.4, 1),
     box-shadow 400ms cubic-bezier(1, 0, 0.4, 1);
+}
+
+/* ==========================================================================
+   APPLE LIQUID GLASS — iPhone-style refraction & specular
+   ========================================================================== */
+.nav-glass {
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0.04) 50%,
+    rgba(255, 255, 255, 0.09) 100%
+  ) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(200%) brightness(1.15) !important;
+  backdrop-filter: blur(28px) saturate(200%) brightness(1.15) !important;
+  border: 0.5px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow:
+    0 0 0 0.5px rgba(255, 255, 255, 0.1),
+    inset 0 1.5px 0 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 0 rgba(255, 255, 255, 0.06),
+    inset 0 0 30px rgba(255, 255, 255, 0.04),
+    0 12px 40px -8px rgba(0, 0, 0, 0.45),
+    0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  overflow: hidden !important;
+  transition: box-shadow 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Specular highlight — top-surface light reflection curve */
+.nav-glass::before {
+  content: "" !important;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.06) 30%,
+    transparent 55%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Animated refraction shimmer — light sweeping through glass */
+.nav-glass::after {
+  content: "" !important;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.04) 40%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.04) 60%,
+    transparent 80%
+  );
+  transform: translateX(-150%);
+  animation: liquidShimmer 12s ease-in-out infinite;
+  animation-delay: 3s;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes liquidShimmer {
+  0%, 100% { transform: translateX(-150%); }
+  40%, 60% { transform: translateX(350%); }
 }
 
 .switcher__legend {
