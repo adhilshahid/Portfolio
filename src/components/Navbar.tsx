@@ -77,8 +77,13 @@ export default function Navbar() {
     }
   };
 
-  const renderNavItems = () => (
-    <fieldset className="nav-glass pointer-events-auto h-[64px] sm:h-[70px]">
+  const renderNavItems = (isTopPosition = false) => {
+    const heightClass = isTopPosition ? "h-[48px] sm:h-[54px]" : "h-[64px] sm:h-[70px]";
+    const padding = isTopPosition ? "0 12px" : "0 20px";
+    const textClass = isTopPosition ? "text-[10px]" : "text-[11px] sm:text-xs";
+    
+    return (
+    <fieldset className={`nav-glass pointer-events-auto ${heightClass}`}>
       <legend className="switcher__legend">Navigation Menu</legend>
       <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar snap-x h-full relative z-[5]">
         {navLinks.map((item) => {
@@ -90,11 +95,11 @@ export default function Navbar() {
               href={`#${item.toLowerCase()}`}
               onClick={(e) => handleNavClick(e, item)}
               className={`switcher__option snap-center relative uppercase font-bold tracking-wide transition-all duration-300 group h-full`}
-              style={{ width: 'auto', minWidth: 'max-content', padding: '0 20px', color: isActive ? 'var(--c-content)' : 'var(--c-glass)' }}
+              style={{ width: 'auto', minWidth: 'max-content', padding: padding, color: isActive ? 'var(--c-content)' : 'var(--c-glass)' }}
               aria-current={isActive ? "page" : undefined}
               aria-label={`Navigate to ${item}`}
             >
-              <span className="relative z-10 transition-transform duration-300 group-hover:scale-105 inline-block text-[11px] sm:text-xs">
+              <span className={`relative z-10 transition-transform duration-300 group-hover:scale-105 inline-block ${textClass}`}>
                 {item}
               </span>
 
@@ -161,6 +166,7 @@ export default function Navbar() {
       </div>
     </fieldset>
   );
+  };
 
   return (
     <header className="fixed inset-0 pointer-events-none z-50 flex flex-col justify-between">
@@ -207,7 +213,7 @@ export default function Navbar() {
               layoutId="nav-pill"
               className="flex items-center relative"
             >
-              {renderNavItems()}
+              {renderNavItems(true)}
             </motion.nav>
           )}
         </div>
@@ -227,7 +233,7 @@ export default function Navbar() {
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="pointer-events-auto flex items-center rounded-[50px] max-w-full relative"
           >
-            {renderNavItems()}
+            {renderNavItems(false)}
           </motion.nav>
         ) : null}
       </div>
