@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { Cursor } from "@/components/ui/inverted-cursor";
 import LenisProvider from "@/components/LenisProvider";
+import Preloader from "@/components/Preloader";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,6 +22,7 @@ export default function RootLayout({
     <html lang="en" className="dark h-full antialiased bg-[#050505]">
       <body className={`${inter.className} min-h-full flex flex-col bg-[#050505] text-white overflow-x-hidden`}>
         <LenisProvider>
+          <Preloader />
           <Navbar />
           {children}
           <Cursor />
