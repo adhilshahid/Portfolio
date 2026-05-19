@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 
-const navLinks = ['Home', 'About', 'Experience', 'Work', 'Skill', 'Project', 'Certification', 'Contact'];
+const navLinks = ['Home', 'About', 'Experience', 'Skill', 'Project', 'Certification', 'Contact'];
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
