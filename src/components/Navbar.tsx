@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 
-const navLinks = ['Home', 'About', 'Work', 'Skill', 'Project', 'Certification', 'Contact'];
+const navLinks = ['Home', 'About', 'Experience', 'Work', 'Skill', 'Project', 'Certification', 'Contact'];
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -94,7 +94,7 @@ export default function Navbar() {
               key={item}
               href={`#${item.toLowerCase()}`}
               onClick={(e) => handleNavClick(e, item)}
-              className={`switcher__option snap-center relative uppercase font-bold tracking-wide transition-all duration-300 group h-full`}
+              className={`switcher__option snap-center relative uppercase font-bold tracking-wide whitespace-nowrap transition-all duration-300 group h-full`}
               style={{ width: 'auto', minWidth: 'max-content', padding: padding, color: isActive ? 'var(--c-content)' : 'var(--c-glass)' }}
               aria-current={isActive ? "page" : undefined}
               aria-label={`Navigate to ${item}`}
@@ -105,7 +105,7 @@ export default function Navbar() {
 
               {isActive && (
                 <motion.div
-                  layoutId="liquid-active-bg"
+                  layoutId={`liquid-active-bg-${isTopPosition ? 'top' : 'bottom'}`}
                   className="absolute inset-[4px] z-0 rounded-full liquid-blob-bg"
                   initial={false}
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
