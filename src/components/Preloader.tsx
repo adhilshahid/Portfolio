@@ -145,9 +145,13 @@ export default function Preloader() {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1, ease: "easeInOut" }}
+          initial={{ opacity: 1, "--mask-size": "0vmax" } as any}
+          exit={{ "--mask-size": "150vmax" } as any}
+          transition={{ duration: 1.5, ease: [0.76, 0, 0.24, 1] }}
+          style={{
+            maskImage: "radial-gradient(circle at center, transparent var(--mask-size), black var(--mask-size))",
+            WebkitMaskImage: "radial-gradient(circle at center, transparent var(--mask-size), black var(--mask-size))"
+          }}
           className="fixed inset-0 z-[9999] bg-[#050505] flex items-center justify-center overflow-hidden cursor-none pointer-events-auto"
         >
           <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
