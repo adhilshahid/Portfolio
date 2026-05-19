@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { Network, Code, MapPin, Calendar, Building2 } from 'lucide-react';
 
@@ -46,7 +46,7 @@ const TimelineItem = ({ exp, index }: { exp: typeof experiences[0], index: numbe
       {/* Mobile/Default Layout (Single Column) hidden on md and up */}
       <div className="w-full md:hidden flex flex-col gap-6 pl-12 relative">
         <motion.div 
-          className="absolute left-0 top-0 w-8 h-8 rounded-full border-4 border-[#050505] z-10 flex items-center justify-center shadow-[0_0_15px_rgba(255,0,128,0.5)]"
+          className="absolute left-0 top-0 w-8 h-8 rounded-full z-10 flex items-center justify-center shadow-[0_0_15px_rgba(255,0,128,0.5)]"
           style={{ backgroundColor: exp.color, boxShadow: `0 0 20px ${exp.color}80` }}
           initial={{ scale: 0 }}
           animate={isInView ? { scale: 1 } : { scale: 0 }}
@@ -66,9 +66,9 @@ const TimelineItem = ({ exp, index }: { exp: typeof experiences[0], index: numbe
         </div>
 
         {/* Center Node */}
-        <div className="w-[10%] flex justify-center relative z-10">
+        <div className="w-[10%] flex justify-center relative z-20">
           <motion.div 
-            className="w-12 h-12 rounded-full border-4 border-[#050505] flex items-center justify-center relative"
+            className="w-12 h-12 rounded-full flex items-center justify-center relative"
             style={{ backgroundColor: exp.color, boxShadow: `0 0 25px ${exp.color}90` }}
             initial={{ scale: 0 }}
             animate={isInView ? { scale: 1 } : { scale: 0 }}
@@ -161,6 +161,22 @@ const Card = ({ exp, isInView, delay, direction }: { exp: typeof experiences[0],
 
 export default function Experience() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isScrolling, setIsScrolling] = useState(false);
+  
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    const handleScroll = () => {
+      setIsScrolling(true);
+      clearTimeout(timeout);
+      timeout = setTimeout(() => setIsScrolling(false), 150);
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(timeout);
+    };
+  }, []);
   
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -218,11 +234,41 @@ export default function Experience() {
         <div className="relative max-w-5xl mx-auto" ref={containerRef}>
           
           {/* The Glowing Animated Central Line */}
-          <div className="absolute left-[16px] md:left-1/2 md:-translate-x-1/2 top-0 bottom-0 w-[2px] bg-zinc-800/50">
+          <div className="absolute left-[16px] md:left-1/2 md:-translate-x-1/2 top-0 bottom-0 w-[2px] bg-zinc-800/50 z-0">
+            {/* The Drawn Line */}
             <motion.div 
-              className="absolute top-0 left-0 w-full origin-top bg-gradient-to-b from-[#FF0080] to-[#FF6B35] drop-shadow-[0_0_10px_rgba(255,0,128,0.8)]"
+              className="absolute top-0 left-0 w-full origin-top bg-gradient-to-b from-[#FF0080] to-[#FF6B35] transition-[filter] duration-300"
+              animate={{
+                filter: isScrolling 
+                  ? "drop-shadow(0 0 15px rgba(255,0,128,0.9)) drop-shadow(0 0 30px rgba(255,107,53,0.8))" 
+                  : "drop-shadow(0 0 5px rgba(255,0,128,0.4))"
+              }}
               style={{ scaleY, height: "100%" }}
             />
+            {/* The Moving Spark */}
+            <motion.div
+              className="absolute left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-white rounded-full z-30"
+              animate={isScrolling ? {
+                opacity: [0.9, 0.6, 1, 0.7, 0.9],
+                scale: [1, 1.1, 0.95, 1.05, 1],
+                boxShadow: [
+                  "0 0 15px 3px #FF0080, 0 0 30px 6px #FF6B35",
+                  "0 0 10px 2px #FF0080, 0 0 20px 4px #FF6B35",
+                  "0 0 20px 4px #FF0080, 0 0 40px 8px #FF6B35",
+                ]
+              } : {
+                opacity: 0.8,
+                scale: 1,
+                boxShadow: "0 0 10px 2px #FF0080"
+              }}
+              transition={isScrolling ? { duration: 0.25, repeat: Infinity, ease: "linear" } : { duration: 0.5 }}
+              style={{ 
+                 top: useTransform(scrollYProgress, [0, 1], ["0%", "100%"]),
+                 marginTop: "-5px"
+              }}
+            >
+              <div className="w-full h-full bg-white rounded-full" />
+            </motion.div>
           </div>
 
           {/* Timeline Items */}
