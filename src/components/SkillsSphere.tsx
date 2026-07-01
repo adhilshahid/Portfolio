@@ -212,7 +212,7 @@ export default function SkillsSphere() {
   return (
     <section
       ref={sectionRef}
-      id="skills"
+      id="skill"
       className="relative w-full bg-[#050505] flex flex-col items-center justify-center overflow-hidden py-24 md:py-32"
     >
       {/* Subtle grid background */}
@@ -478,6 +478,7 @@ export default function SkillsSphere() {
                   position: 'absolute',
                   left: 0,
                   top: 0,
+                  width: 'max-content',
                   willChange: 'transform, opacity',
                   whiteSpace: 'nowrap',
                 }}
