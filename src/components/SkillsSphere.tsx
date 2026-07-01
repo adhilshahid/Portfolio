@@ -195,7 +195,7 @@ export default function SkillsSphere() {
 
     const sensitivity = 0.006;
     dragVelocity.current.x = -dy * sensitivity;
-    dragVelocity.current.y = -dx * sensitivity;
+    dragVelocity.current.y = dx * sensitivity;
 
     rotation.current.x += dragVelocity.current.x;
     rotation.current.y += dragVelocity.current.y;
