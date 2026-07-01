@@ -14,9 +14,10 @@ const experiences = [
     color: "#FF0080", // Pink
     icon: <Network className="w-6 h-6" />,
     points: [
-      "Managed and maintained LAN/WAN networks for 2000+ stores, ensuring 99% uptime and secure connectivity.",
-      "Designed a real-time web-based network monitoring application integrating Aruba Central REST APIs with a Node.js/Express.js backend.",
-      "Optimized VLAN configurations, DHCP services, and IPAM across multiple locations to improve security and scalability."
+      "Engineered and maintained SD-WAN LAN/WAN infrastructure across 2,000+ sites, achieving 99% uptime through proactive monitoring, redundant failover paths, and secure site-to-site connectivity.",
+      "Automated IP subnet allocation using a standardized IP addressing schema, generating VLAN subnet ranges dynamically and assigning device-specific IPs based on device role/type - reducing manual provisioning errors and accelerating site rollout timelines.",
+      "Administered end-to-end DDI (DNS, DHCP, IPAM), VLAN segmentation, firewall policies, and proxy configurations across multi-site deployments, strengthening network security posture, reducing IP conflicts, and improving scalability for future site rollouts.",
+      "Managed Network Access Control (NAC) via Aruba ClearPass, enforcing 802.1X authentication, role-based device profiling, and secure guest device onboarding across the store fleet.",
     ]
   },
   {
@@ -42,10 +43,10 @@ const TimelineItem = ({ exp, index }: { exp: typeof experiences[0], index: numbe
 
   return (
     <div ref={itemRef} className="relative flex items-center justify-center w-full mb-24 last:mb-0">
-      
+
       {/* Mobile/Default Layout (Single Column) hidden on md and up */}
       <div className="w-full md:hidden flex flex-col gap-6 pl-12 relative">
-        <motion.div 
+        <motion.div
           className="absolute left-0 top-0 w-8 h-8 rounded-full z-10 flex items-center justify-center shadow-[0_0_15px_rgba(255,0,128,0.5)]"
           style={{ backgroundColor: exp.color, boxShadow: `0 0 20px ${exp.color}80` }}
           initial={{ scale: 0 }}
@@ -54,7 +55,7 @@ const TimelineItem = ({ exp, index }: { exp: typeof experiences[0], index: numbe
         >
           <div className="text-[#050505] scale-[0.5]">{exp.icon}</div>
         </motion.div>
-        
+
         <Card exp={exp} isInView={isInView} delay={0.3} direction={1} />
       </div>
 
@@ -67,7 +68,7 @@ const TimelineItem = ({ exp, index }: { exp: typeof experiences[0], index: numbe
 
         {/* Center Node */}
         <div className="w-[10%] flex justify-center relative z-20">
-          <motion.div 
+          <motion.div
             className="w-12 h-12 rounded-full flex items-center justify-center relative"
             style={{ backgroundColor: exp.color, boxShadow: `0 0 25px ${exp.color}90` }}
             initial={{ scale: 0 }}
@@ -84,14 +85,14 @@ const TimelineItem = ({ exp, index }: { exp: typeof experiences[0], index: numbe
           {!isEven && <Card exp={exp} isInView={isInView} delay={0.3} direction={1} />}
         </div>
       </div>
-      
+
     </div>
   );
 };
 
 const Card = ({ exp, isInView, delay, direction }: { exp: typeof experiences[0], isInView: boolean, delay: number, direction: number }) => {
   return (
-    <motion.div 
+    <motion.div
       className="w-full bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-8 hover:bg-zinc-900/60 transition-all duration-500 group relative overflow-hidden"
       initial={{ opacity: 0, x: 50 * direction }}
       animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 50 * direction }}
@@ -99,14 +100,14 @@ const Card = ({ exp, isInView, delay, direction }: { exp: typeof experiences[0],
     >
       {/* Top Gradient Accent */}
       <div className="absolute top-0 left-0 w-full h-1 opacity-50" style={{ background: `linear-gradient(90deg, transparent, ${exp.color}, transparent)` }} />
-      
+
       <div className="flex flex-col gap-4">
         {/* Header Section */}
         <div className="flex flex-col gap-3 mb-1">
           {/* Badge & Location */}
           <div className="flex items-center justify-between">
-            <div className="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full border backdrop-blur-md transition-colors duration-300 group-hover:bg-opacity-20" 
-                 style={{ borderColor: `${exp.color}30`, color: exp.color, backgroundColor: `${exp.color}10` }}>
+            <div className="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full border backdrop-blur-md transition-colors duration-300 group-hover:bg-opacity-20"
+              style={{ borderColor: `${exp.color}30`, color: exp.color, backgroundColor: `${exp.color}10` }}>
               {exp.date}
             </div>
             <div className="flex items-center gap-1.5 text-xs text-zinc-500 font-medium">
@@ -114,7 +115,7 @@ const Card = ({ exp, isInView, delay, direction }: { exp: typeof experiences[0],
               <span>{exp.location}</span>
             </div>
           </div>
-          
+
           {/* Title & Company */}
           <div className="mt-2">
             <div className="relative inline-block mb-1">
@@ -124,15 +125,15 @@ const Card = ({ exp, isInView, delay, direction }: { exp: typeof experiences[0],
                   {exp.role}
                 </span>
                 {/* Hover gradient text */}
-                <span className="absolute left-0 top-0 text-transparent bg-clip-text opacity-0 transition-opacity duration-500 group-hover:opacity-100" 
-                      style={{ backgroundImage: `linear-gradient(135deg, #ffffff 0%, ${exp.color} 100%)` }}>
+                <span className="absolute left-0 top-0 text-transparent bg-clip-text opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                  style={{ backgroundImage: `linear-gradient(135deg, #ffffff 0%, ${exp.color} 100%)` }}>
                   {exp.role}
                 </span>
               </h4>
               {/* Animated Glowing Underline */}
-              <div 
+              <div
                 className="absolute -bottom-1 left-0 h-[2px] w-0 rounded-full opacity-0 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:w-full group-hover:opacity-100"
-                style={{ 
+                style={{
                   backgroundColor: exp.color,
                   boxShadow: `0 2px 15px 2px ${exp.color}80, 0 0 5px 1px ${exp.color}40`
                 }}
@@ -162,7 +163,7 @@ const Card = ({ exp, isInView, delay, direction }: { exp: typeof experiences[0],
 export default function Experience() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isScrolling, setIsScrolling] = useState(false);
-  
+
   useEffect(() => {
     let timeout: NodeJS.Timeout;
     const handleScroll = () => {
@@ -170,14 +171,14 @@ export default function Experience() {
       clearTimeout(timeout);
       timeout = setTimeout(() => setIsScrolling(false), 150);
     };
-    
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
       window.removeEventListener('scroll', handleScroll);
       clearTimeout(timeout);
     };
   }, []);
-  
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start center", "end center"]
@@ -187,12 +188,12 @@ export default function Experience() {
   const scaleY = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   return (
-    <section 
-      id="experience" 
+    <section
+      id="experience"
       className="relative w-full min-h-screen bg-[#050505] flex flex-col items-center justify-start overflow-hidden py-24 md:py-32"
     >
       {/* Tech Grid Background */}
-      <div 
+      <div
         className="absolute inset-0 z-0 opacity-[0.04] pointer-events-none"
         style={{
           backgroundImage: `
@@ -206,21 +207,21 @@ export default function Experience() {
       />
 
       {/* Optimized Ambient Breathing Glows */}
-      <motion.div 
-        className="absolute top-[10%] right-[5%] w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-[#FF0080] rounded-full blur-[150px] mix-blend-screen pointer-events-none" 
+      <motion.div
+        className="absolute top-[10%] right-[5%] w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-[#FF0080] rounded-full blur-[150px] mix-blend-screen pointer-events-none"
         animate={{ opacity: [0.08, 0.15, 0.08] }}
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         style={{ willChange: 'opacity' }}
       />
-      <motion.div 
-        className="absolute bottom-[10%] left-[5%] w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-[#FF6B35] rounded-full blur-[150px] mix-blend-screen pointer-events-none" 
+      <motion.div
+        className="absolute bottom-[10%] left-[5%] w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-[#FF6B35] rounded-full blur-[150px] mix-blend-screen pointer-events-none"
         animate={{ opacity: [0.08, 0.15, 0.08] }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
         style={{ willChange: 'opacity' }}
       />
 
       <div className="container mx-auto px-6 max-w-6xl relative z-10">
-        
+
         {/* Header */}
         <div className="text-center mb-20 md:mb-32">
           <h2 className="text-sm uppercase tracking-[0.3em] text-zinc-500 font-semibold mb-6">Career Path</h2>
@@ -232,15 +233,15 @@ export default function Experience() {
         </div>
 
         <div className="relative max-w-5xl mx-auto" ref={containerRef}>
-          
+
           {/* The Glowing Animated Central Line */}
           <div className="absolute left-[16px] md:left-1/2 md:-translate-x-1/2 top-0 bottom-0 w-[2px] bg-zinc-800/50 z-0">
             {/* The Drawn Line */}
-            <motion.div 
+            <motion.div
               className="absolute top-0 left-0 w-full origin-top bg-gradient-to-b from-[#FF0080] to-[#FF6B35] transition-[filter] duration-300"
               animate={{
-                filter: isScrolling 
-                  ? "drop-shadow(0 0 15px rgba(255,0,128,0.9)) drop-shadow(0 0 30px rgba(255,107,53,0.8))" 
+                filter: isScrolling
+                  ? "drop-shadow(0 0 15px rgba(255,0,128,0.9)) drop-shadow(0 0 30px rgba(255,107,53,0.8))"
                   : "drop-shadow(0 0 5px rgba(255,0,128,0.4))"
               }}
               style={{ scaleY, height: "100%" }}
@@ -262,9 +263,9 @@ export default function Experience() {
                 boxShadow: "0 0 10px 2px #FF0080"
               }}
               transition={isScrolling ? { duration: 0.25, repeat: Infinity, ease: "linear" } : { duration: 0.5 }}
-              style={{ 
-                 top: useTransform(scrollYProgress, [0, 1], ["0%", "100%"]),
-                 marginTop: "-5px"
+              style={{
+                top: useTransform(scrollYProgress, [0, 1], ["0%", "100%"]),
+                marginTop: "-5px"
               }}
             >
               <div className="w-full h-full bg-white rounded-full" />
