@@ -3,6 +3,7 @@ import Overlay from '@/components/Overlay';
 import NanoBanana from '@/components/NanoBanana';
 import About from '@/components/About';
 import Experience from '@/components/Experience';
+import SkillsSphere from '@/components/SkillsSphere';
 
 export default function Home() {
   return (
@@ -12,6 +13,7 @@ export default function Home() {
       </ScrollyCanvas>
       <About />
       <Experience />
+      <SkillsSphere />
       <NanoBanana />
     </main>
   );
