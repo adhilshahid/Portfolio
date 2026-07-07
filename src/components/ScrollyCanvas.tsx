@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState, ReactNode } from 'react';
 import { useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
+import { ScrollProvider } from './ScrollContext';
 
 const FRAME_COUNT = 89;
 
@@ -100,7 +101,9 @@ export default function ScrollyCanvas({ children }: ScrollyCanvasProps) {
           className="block h-full w-full object-cover"
         />
         <div className="absolute inset-0 z-10">
-          {children}
+          <ScrollProvider value={scrollYProgress}>
+            {children}
+          </ScrollProvider>
         </div>
         
         {!loaded && (
