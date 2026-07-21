@@ -198,8 +198,7 @@ export const Cursor: React.FC = () => {
 
       if (
         target.getAttribute('draggable') === 'true' ||
-        target.classList.contains('grab') ||
-        window.getComputedStyle(target).cursor === 'grab'
+        target.classList.contains('grab')
       ) {
         setMode('grab');
         magnetTarget.current = null;
@@ -210,29 +209,22 @@ export const Cursor: React.FC = () => {
         target.tagName === 'A' ||
         target.closest('a') !== null ||
         target.closest('button') !== null ||
+        target.closest('[role="button"]') !== null ||
         target.hasAttribute('data-cursor') ||
-        target.classList.contains('cursor-pointer') ||
-        window.getComputedStyle(target).cursor === 'pointer';
+        target.classList.contains('cursor-pointer');
 
       if (interactive) {
         setMode('hover');
-        const el = target.closest('a') || target.closest('button') || target;
+        const el = target.closest('a') || target.closest('button') || target.closest('[role="button"]') || target;
         const rect = el.getBoundingClientRect();
         magnetTarget.current = { x: rect.left, y: rect.top, w: rect.width, h: rect.height };
         return;
       }
 
       if (
-        ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'SPAN', 'LI', 'LABEL'].includes(target.tagName) ||
-        target.classList.contains('text-hover') ||
-        window.getComputedStyle(target).cursor === 'text'
+        ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'SPAN', 'LI', 'LABEL', 'INPUT', 'TEXTAREA'].includes(target.tagName) ||
+        target.classList.contains('text-hover')
       ) {
-        setMode('text');
-        magnetTarget.current = null;
-        return;
-      }
-
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
         setMode('text');
         magnetTarget.current = null;
         return;

@@ -22,6 +22,8 @@ export default function ScrollyCanvas({ children }: ScrollyCanvasProps) {
   
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const rafIdRef = useRef<number | null>(null);
+  const pendingIndexRef = useRef<number>(1);
 
   // Map 0-1 scroll progress to 1-89 frame index safely mapped
   const frameIndex = useTransform(scrollYProgress, [0, 1], [1, FRAME_COUNT]);
@@ -29,6 +31,7 @@ export default function ScrollyCanvas({ children }: ScrollyCanvasProps) {
   useEffect(() => {
     let isCanceled = false;
     const loadImages = async () => {
+      imagesRef.current = [];
       const promises = [];
       for (let i = 1; i <= FRAME_COUNT; i++) {
         const img = new Image();
@@ -51,7 +54,12 @@ export default function ScrollyCanvas({ children }: ScrollyCanvasProps) {
     };
 
     loadImages();
-    return () => { isCanceled = true; };
+    return () => {
+      isCanceled = true;
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+    };
   }, []);
 
   const drawFrame = (index: number) => {
@@ -75,9 +83,18 @@ export default function ScrollyCanvas({ children }: ScrollyCanvasProps) {
     }
   };
 
+  const scheduleDraw = (index: number) => {
+    pendingIndexRef.current = index;
+    if (rafIdRef.current !== null) return;
+    rafIdRef.current = requestAnimationFrame(() => {
+      rafIdRef.current = null;
+      drawFrame(pendingIndexRef.current);
+    });
+  };
+
   useMotionValueEvent(frameIndex, "change", (latest) => {
     if (loaded) {
-      drawFrame(Math.floor(latest));
+      scheduleDraw(Math.floor(latest));
     }
   });
 
@@ -86,7 +103,7 @@ export default function ScrollyCanvas({ children }: ScrollyCanvasProps) {
       if (!canvasRef.current) return;
       canvasRef.current.width = window.innerWidth;
       canvasRef.current.height = window.innerHeight;
-      if (loaded) drawFrame(Math.floor(frameIndex.get()));
+      if (loaded) scheduleDraw(Math.floor(frameIndex.get()));
     };
     window.addEventListener('resize', handleResize);
     handleResize();

@@ -4,9 +4,12 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 
+import { useLenis } from 'lenis/react';
+
 const navLinks = ['Home', 'About', 'Experience', 'Skill', 'Project', 'Certification', 'Contact'];
 
 export default function Navbar() {
+  const lenis = useLenis();
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('Home');
 
@@ -67,13 +70,21 @@ export default function Navbar() {
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, item: string) => {
     e.preventDefault();
     if (item === 'Home') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (lenis) {
+        lenis.scrollTo(0, { duration: 1.2 });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
       return;
     }
 
     const target = document.getElementById(item.toLowerCase());
     if (target) {
-      target.scrollIntoView({ behavior: 'smooth' });
+      if (lenis) {
+        lenis.scrollTo(target, { duration: 1.2 });
+      } else {
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   };
 

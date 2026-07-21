@@ -16,6 +16,19 @@ const ParticleNetwork = () => {
 
     let particlesArray: Particle[] = [];
     let animationFrameId: number;
+    let isVisible = true;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      isVisible = entry.isIntersecting;
+      if (isVisible) {
+        cancelAnimationFrame(animationFrameId);
+        animate();
+      } else {
+        cancelAnimationFrame(animationFrameId);
+      }
+    }, { threshold: 0.05 });
+
+    observer.observe(canvas);
 
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
@@ -77,22 +90,24 @@ const ParticleNetwork = () => {
 
     const init = () => {
       particlesArray = [];
-      const numberOfParticles = (canvas.width * canvas.height) / 12000;
+      const numberOfParticles = Math.min((canvas.width * canvas.height) / 14000, 80);
       for (let i = 0; i < numberOfParticles; i++) {
         particlesArray.push(new Particle());
       }
     };
 
     const connect = () => {
-      let opacity = 1;
+      const maxDistance = 120;
+      const maxDistSq = maxDistance * maxDistance;
       for (let a = 0; a < particlesArray.length; a++) {
-        for (let b = a; b < particlesArray.length; b++) {
+        for (let b = a + 1; b < particlesArray.length; b++) {
           const dx = particlesArray[a].x - particlesArray[b].x;
           const dy = particlesArray[a].y - particlesArray[b].y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
+          const distSq = dx * dx + dy * dy;
 
-          if (distance < 120) {
-            opacity = 1 - distance / 120;
+          if (distSq < maxDistSq) {
+            const distance = Math.sqrt(distSq);
+            const opacity = 1 - distance / maxDistance;
             // Use average color of the two particles for the line
             const ratio = (particlesArray[a].x + particlesArray[b].x) / 2 / canvas.width;
             const r = 255;
@@ -111,7 +126,7 @@ const ParticleNetwork = () => {
     };
 
     const animate = () => {
-      if (!ctx || !canvas) return;
+      if (!ctx || !canvas || !isVisible) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (let i = 0; i < particlesArray.length; i++) {
         particlesArray[i].update();
@@ -125,6 +140,7 @@ const ParticleNetwork = () => {
     animate();
 
     return () => {
+      observer.disconnect();
       window.removeEventListener('resize', resizeCanvas);
       cancelAnimationFrame(animationFrameId);
     };

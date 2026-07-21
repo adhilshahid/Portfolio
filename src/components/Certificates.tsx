@@ -102,28 +102,16 @@ const categoryMeta: Record<string, { color: string; label: string }> = {
 function FloatingOrbs() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-      {[...Array(6)].map((_, i) => (
-        <motion.div
+      {[...Array(4)].map((_, i) => (
+        <div
           key={i}
-          className="absolute rounded-full"
+          className="absolute rounded-full opacity-30"
           style={{
-            width: `${60 + i * 30}px`,
-            height: `${60 + i * 30}px`,
-            top: `${10 + i * 15}%`,
-            left: `${5 + i * 16}%`,
-            background: `radial-gradient(circle, ${i % 2 === 0 ? 'rgba(255,0,128,0.08)' : 'rgba(255,107,53,0.08)'} 0%, transparent 70%)`,
-            filter: 'blur(20px)',
-          }}
-          animate={{
-            y: [0, -20 - i * 5, 0],
-            x: [0, 10 + i * 3, 0],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{
-            duration: 6 + i * 1.5,
-            repeat: Infinity,
-            ease: 'easeInOut',
-            delay: i * 0.8,
+            width: `${100 + i * 40}px`,
+            height: `${100 + i * 40}px`,
+            top: `${15 + i * 22}%`,
+            left: `${8 + i * 24}%`,
+            background: `radial-gradient(circle, ${i % 2 === 0 ? 'rgba(255,0,128,0.12)' : 'rgba(255,107,53,0.12)'} 0%, transparent 70%)`,
           }}
         />
       ))}
@@ -141,18 +129,16 @@ function CertCard({
   index: number;
   onOpen: (idx: number) => void;
 }) {
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-40px' });
   const { color, label } = categoryMeta[cert.category];
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [isHovering, setIsHovering] = useState(false);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    setMousePos({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    });
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    e.currentTarget.style.setProperty('--mouse-x', `${x}px`);
+    e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
   }, []);
 
   return (
@@ -168,8 +154,6 @@ function CertCard({
       }}
       onClick={() => onOpen(index)}
       onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
@@ -180,18 +164,16 @@ function CertCard({
       }}
       aria-label={`View certificate: ${cert.title}`}
     >
-      {/* Spotlight follow effect */}
-      {isHovering && (
-        <div
-          className="absolute inset-0 z-[1] pointer-events-none transition-opacity duration-300"
-          style={{
-            background: `radial-gradient(400px circle at ${mousePos.x}px ${mousePos.y}px, ${color}12, transparent 60%)`,
-          }}
-        />
-      )}
+      {/* GPU-accelerated spotlight follow effect via CSS variables (zero React re-renders) */}
+      <div
+        className="absolute inset-0 z-[1] pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        style={{
+          background: `radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), ${color}18, transparent 60%)`,
+        }}
+      />
 
-      {/* Glass card body */}
-      <div className="relative z-[2] bg-zinc-900/50 backdrop-blur-xl border border-zinc-800/60 rounded-2xl overflow-hidden transition-all duration-500 group-hover:border-zinc-700/60 group-hover:bg-zinc-900/70">
+      {/* Optimized glass card body */}
+      <div className="relative z-[2] bg-[#0d0d10]/90 border border-zinc-800/80 rounded-2xl overflow-hidden transition-all duration-300 group-hover:border-zinc-700 group-hover:bg-[#121216]/95">
 
         {/* Top accent line */}
         <div
@@ -202,39 +184,35 @@ function CertCard({
         />
 
         {/* Certificate Image */}
-        <div className="relative w-full aspect-[4/3] overflow-hidden bg-zinc-950/80">
+        <div className="relative w-full aspect-[4/3] overflow-hidden bg-zinc-950">
           <Image
             src={cert.image}
             alt={cert.title}
             fill
             sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 30vw"
-            className="object-cover object-top transition-all duration-700 ease-out group-hover:scale-[1.04]"
+            className="object-cover object-top transition-transform duration-500 ease-out group-hover:scale-[1.04]"
           />
 
           {/* Gradient vignette */}
           <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-transparent to-zinc-950/20 pointer-events-none" />
 
           {/* View badge on hover */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500">
-            <motion.span
-              className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-white/95 px-4 py-2 rounded-full border border-white/20 backdrop-blur-xl"
-              style={{ backgroundColor: `${color}25` }}
-              initial={false}
-              animate={isHovering ? { scale: 1, y: 0 } : { scale: 0.8, y: 10 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+            <span
+              className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-white/95 px-4 py-2 rounded-full border border-white/20 bg-zinc-900/90 shadow-lg"
+              style={{ backgroundColor: `${color}30` }}
             >
               <ExternalLink className="w-3.5 h-3.5" />
               View
-            </motion.span>
+            </span>
           </div>
 
           {/* Certificate number badge */}
           <div
-            className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black border backdrop-blur-xl"
+            className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black border bg-zinc-950/80"
             style={{
               borderColor: `${color}40`,
               color,
-              backgroundColor: `${color}10`,
             }}
           >
             {String(cert.id).padStart(2, '0')}
@@ -246,11 +224,10 @@ function CertCard({
           {/* Category + Date */}
           <div className="flex items-center justify-between">
             <span
-              className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.15em] px-2.5 py-[5px] rounded-full border backdrop-blur-md"
+              className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.15em] px-2.5 py-[5px] rounded-full border bg-zinc-950/80"
               style={{
-                borderColor: `${color}25`,
+                borderColor: `${color}30`,
                 color,
-                backgroundColor: `${color}08`,
               }}
             >
               <ShieldCheck className="w-3 h-3" />
@@ -276,9 +253,9 @@ function CertCard({
 
       {/* Outer glow on hover */}
       <div
-        className="absolute -inset-[1px] rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none -z-[1]"
+        className="absolute -inset-[1px] rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none -z-[1]"
         style={{
-          boxShadow: `0 0 40px ${color}15, 0 0 80px ${color}08`,
+          boxShadow: `0 0 30px ${color}15`,
         }}
       />
     </motion.div>
@@ -530,7 +507,7 @@ export default function Certificates() {
             transition={{ duration: 0.7, ease: 'easeOut' }}
           >
             <motion.div
-              className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500 mb-6 border border-zinc-800/50 rounded-full px-4 py-1.5 bg-zinc-900/30 backdrop-blur-md"
+              className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500 mb-6 border border-zinc-800/80 rounded-full px-4 py-1.5 bg-zinc-900/80"
               initial={{ opacity: 0, y: 10 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: 0.1 }}

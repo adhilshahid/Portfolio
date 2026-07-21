@@ -110,7 +110,23 @@ export default function SkillsSphere() {
     const HOVER_DECAY = 0.96;
     const RETURN_LERP = 0.03;
 
+    let isVisible = true;
+    const elSection = sectionRef.current;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      isVisible = entry.isIntersecting;
+      if (isVisible) {
+        cancelAnimationFrame(animFrameRef.current);
+        animFrameRef.current = requestAnimationFrame(tick);
+      } else {
+        cancelAnimationFrame(animFrameRef.current);
+      }
+    }, { threshold: 0.05 });
+
+    if (elSection) observer.observe(elSection);
+
     const tick = () => {
+      if (!isVisible) return;
       const v = velocity.current;
       const rot = rotation.current;
 
@@ -176,7 +192,11 @@ export default function SkillsSphere() {
     };
 
     animFrameRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(animFrameRef.current);
+    return () => {
+      if (elSection) observer.unobserve(elSection);
+      observer.disconnect();
+      cancelAnimationFrame(animFrameRef.current);
+    };
   }, []);
 
   // ─── Pointer Handlers ─────────────────────────────────────
