@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import { Network, Code, MapPin, Calendar, Building2 } from 'lucide-react';
+import { Network, Code, MapPin, Building2 } from 'lucide-react';
 
 const experiences = [
   {
@@ -163,13 +163,20 @@ const Card = ({ exp, isInView, delay, direction }: { exp: typeof experiences[0],
 export default function Experience() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isScrolling, setIsScrolling] = useState(false);
+  const isScrollingRef = useRef(false);
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
     const handleScroll = () => {
-      setIsScrolling(true);
+      if (!isScrollingRef.current) {
+        isScrollingRef.current = true;
+        setIsScrolling(true);
+      }
       clearTimeout(timeout);
-      timeout = setTimeout(() => setIsScrolling(false), 150);
+      timeout = setTimeout(() => {
+        isScrollingRef.current = false;
+        setIsScrolling(false);
+      }, 150);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
