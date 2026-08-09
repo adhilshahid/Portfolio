@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView, useSpring, useTransform, Variants } from 'framer-motion';
-import { Server, Network, Cloud, Activity, ArrowRight, Share2, Terminal } from 'lucide-react';
+import { Server, Network, Cloud, ArrowRight, Terminal } from 'lucide-react';
 
 // Canvas Particle Network Background
 const ParticleNetwork = () => {
@@ -183,28 +183,28 @@ const AnimatedNumber = ({ value, duration = 2, suffix = '' }: { value: number, d
   );
 };
 
+const staggerChildren: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+    },
+  },
+};
+
+const slideUp: Variants = {
+  hidden: { opacity: 0, y: 50 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.7, ease: "easeOut" }
+  },
+};
+
 export default function About() {
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: true, margin: "-100px" });
-
-  const staggerChildren: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-      },
-    },
-  };
-
-  const slideUp: Variants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 0.7, ease: "easeOut" }
-    },
-  };
 
   return (
     <section 
