@@ -13,6 +13,7 @@ interface ScrollyCanvasProps {
 export default function ScrollyCanvas({ children }: ScrollyCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   
   // Track scroll progress purely within this container
   const { scrollYProgress } = useScroll({
@@ -63,10 +64,9 @@ export default function ScrollyCanvas({ children }: ScrollyCanvasProps) {
   }, []);
 
   const drawFrame = (index: number) => {
-    if (!canvasRef.current || imagesRef.current.length === 0) return;
+    if (!canvasRef.current || !ctxRef.current || imagesRef.current.length === 0) return;
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const ctx = ctxRef.current;
 
     // Use fallback array access gracefully
     const adjustedIndex = Math.max(0, Math.min(index - 1, FRAME_COUNT - 1));
@@ -103,6 +103,7 @@ export default function ScrollyCanvas({ children }: ScrollyCanvasProps) {
       if (!canvasRef.current) return;
       canvasRef.current.width = window.innerWidth;
       canvasRef.current.height = window.innerHeight;
+      ctxRef.current = canvasRef.current.getContext('2d');
       if (loaded) scheduleDraw(Math.floor(frameIndex.get()));
     };
     window.addEventListener('resize', handleResize);
