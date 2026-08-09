@@ -430,6 +430,9 @@ function AnimatedCount({ value, label }: { value: number; label: string }) {
   );
 }
 
+// Pre-compute since certificates array is static
+const uniqueCategories = new Set(certificates.map((c) => c.category)).size;
+
 /* ─── Main Section ──────────────────────────────────────────── */
 export default function Certificates() {
   const sectionRef = useRef(null);
@@ -449,9 +452,6 @@ export default function Certificates() {
       ),
     []
   );
-
-  // Unique category count
-  const uniqueCategories = new Set(certificates.map((c) => c.category)).size;
 
   return (
     <>
