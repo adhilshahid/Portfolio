@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 
@@ -12,12 +12,17 @@ export default function Navbar() {
   const lenis = useLenis();
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('Home');
+  const [isMobile, setIsMobile] = useState(false);
+  const isScrolledRef = useRef(false);
 
   // Handle scroll to transform navbar
   useEffect(() => {
     const handleScroll = () => {
-      // Transition point for the navbar
-      setIsScrolled(window.scrollY > 100);
+      const scrolled = window.scrollY > 100;
+      if (scrolled !== isScrolledRef.current) {
+        isScrolledRef.current = scrolled;
+        setIsScrolled(scrolled);
+      }
 
       // Default to Home if at the very top
       if (window.scrollY < 100) {
@@ -29,6 +34,14 @@ export default function Navbar() {
     handleScroll(); // Check initially
 
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Track viewport width for mobile detection (avoids SSR-unsafe window.innerWidth in render)
+  useEffect(() => {
+    const updateMobile = () => setIsMobile(window.innerWidth < 1024);
+    updateMobile();
+    window.addEventListener('resize', updateMobile);
+    return () => window.removeEventListener('resize', updateMobile);
   }, []);
 
   // Handle Intersection Observer for active sections
@@ -202,6 +215,7 @@ export default function Navbar() {
                   height={40}
                   className="object-contain"
                   style={{ width: 'auto', height: 'auto' }}
+                  priority
                   onError={(e) => {
                     // Fallback if logo not found
                     e.currentTarget.style.display = 'none';
@@ -236,7 +250,7 @@ export default function Navbar() {
             But prompt says: "Initial state: Navbar spans full width with logo on left, nav items on right"
             We will follow prompt: Top on initial, Bottom on scroll. We will handle responsive by allowing horizontal scroll of the pill.
         */}
-        {(isScrolled || typeof window !== 'undefined' && window.innerWidth < 1024 && !isScrolled) ? (
+        {(isScrolled || isMobile && !isScrolled) ? (
           <motion.nav
             layoutId="nav-pill"
             initial={false}
