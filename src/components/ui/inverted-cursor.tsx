@@ -15,6 +15,8 @@ export const Cursor: React.FC = () => {
   const glowRef = useRef<HTMLDivElement>(null);
   const trailRefs = useRef<(HTMLDivElement | null)[]>([]);
   const requestRef = useRef<number | null>(null);
+  const isAnimating = useRef(false);
+  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const pos = useRef({
     cx: -100, cy: -100,
@@ -52,6 +54,14 @@ export const Cursor: React.FC = () => {
   // ---------- animation loop ----------
   useEffect(() => {
     let active = true;
+
+    const stopLoop = () => {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+        requestRef.current = null;
+      }
+      isAnimating.current = false;
+    };
 
     const animate = () => {
       if (!active) return;
@@ -161,14 +171,43 @@ export const Cursor: React.FC = () => {
         }
       }
 
+      // Check if everything has converged — if so, stop the loop to save CPU
+      // Text mode always keeps running (heartbeat animation needs continuous RAF)
+      // Otherwise, stop when dot/ring/glow are all within 0.05px of the target
+      const converged =
+        mode !== 'text' &&
+        Math.abs(p.cx - finalTx) < 0.05 &&
+        Math.abs(p.cy - finalTy) < 0.05 &&
+        Math.abs(p.rx - finalTx) < 0.05 &&
+        Math.abs(p.ry - finalTy) < 0.05 &&
+        Math.abs(p.gx - finalTx) < 0.05 &&
+        Math.abs(p.gy - finalTy) < 0.05;
+
+      if (converged) {
+        stopLoop();
+        return;
+      }
+
       requestRef.current = requestAnimationFrame(animate);
     };
 
-    animate();
+    // Exposed so the mouse-move handler can restart the loop
+    (window as Window & { __cursorStartLoop?: () => void }).__cursorStartLoop = () => {
+      if (!isAnimating.current && active) {
+        isAnimating.current = true;
+        requestRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    // Kick off initial loop
+    isAnimating.current = true;
+    requestRef.current = requestAnimationFrame(animate);
 
     return () => {
       active = false;
-      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      stopLoop();
+      delete (window as Window & { __cursorStartLoop?: () => void }).__cursorStartLoop;
+      if (idleTimer.current) clearTimeout(idleTimer.current);
     };
   }, [mode]);
 
@@ -180,6 +219,8 @@ export const Cursor: React.FC = () => {
       pos.current.tx = e.clientX;
       pos.current.ty = e.clientY;
       if (!visible) setVisible(true);
+      // Restart the RAF loop if it has stopped (converged while idle)
+      (window as Window & { __cursorStartLoop?: () => void }).__cursorStartLoop?.();
     };
 
     const onEnter = () => setVisible(true);
