@@ -194,7 +194,10 @@ export default function Preloader() {
     window.addEventListener("resize", handleResize);
 
     // ─── Create particles ────────────────────────────────────────────
-    const PARTICLE_COUNT = 1200;
+    // Scale particle count based on viewport area (reference: 1920×1080 = ~2M px²)
+    // Clamped between 20% and 100% of the max counts to preserve the effect on all screens
+    const areaRatio = Math.min(1, (width * height) / (1920 * 1080));
+    const PARTICLE_COUNT = Math.round(Math.max(240, 1200 * areaRatio));
     const baseRingRadius = Math.min(width, height) * 0.28;
     const particles: Particle[] = [];
 
@@ -223,7 +226,7 @@ export default function Preloader() {
     }
 
     // ─── Glow particles ──────────────────────────────────────────────
-    const GLOW_COUNT = 60;
+    const GLOW_COUNT = Math.round(Math.max(12, 60 * areaRatio));
     interface GlowParticle {
       angle: number; radius: number; speed: number;
       size: number; opacity: number; phase: number;

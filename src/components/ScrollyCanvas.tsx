@@ -29,29 +29,50 @@ export default function ScrollyCanvas({ children }: ScrollyCanvasProps) {
   // Map 0-1 scroll progress to 1-89 frame index safely mapped
   const frameIndex = useTransform(scrollYProgress, [0, 1], [1, FRAME_COUNT]);
 
+  const loadedCountRef = useRef(0);
+  const [loadProgress, setLoadProgress] = useState(0);
+
   useEffect(() => {
     let isCanceled = false;
-    const loadImages = async () => {
-      imagesRef.current = [];
-      const promises = [];
-      for (let i = 1; i <= FRAME_COUNT; i++) {
+
+    // Pre-allocate slots so drawFrame can index by position immediately
+    imagesRef.current = new Array(FRAME_COUNT);
+
+    const loadOne = (i: number): Promise<void> => {
+      return new Promise((resolve) => {
         const img = new Image();
         const paddedIndex = String(i).padStart(4, '0');
         img.src = `/sequence/${paddedIndex}.webp`;
-        promises.push(
-          new Promise((resolve) => {
-            img.onload = () => resolve(img);
-            // Ignore error for missing placeholder gracefully
-            img.onerror = () => resolve(img);
-          })
-        );
-        imagesRef.current.push(img);
+        const done = () => {
+          if (!isCanceled) {
+            imagesRef.current[i - 1] = img;
+            loadedCountRef.current += 1;
+            setLoadProgress(Math.round((loadedCountRef.current / FRAME_COUNT) * 100));
+          }
+          resolve();
+        };
+        img.onload = done;
+        img.onerror = done;
+      });
+    };
+
+    const loadImages = async () => {
+      // Phase 1: load 5 evenly-spaced keyframes first so scrubbing starts ASAP
+      const keyframes = [1, 23, 45, 67, 89];
+      await Promise.all(keyframes.map(loadOne));
+
+      if (isCanceled) return;
+
+      // Show canvas immediately after first keyframe — no more long wait
+      setLoaded(true);
+      drawFrame(1);
+
+      // Phase 2: load the remaining frames in the background
+      const rest = [];
+      for (let i = 1; i <= FRAME_COUNT; i++) {
+        if (!keyframes.includes(i)) rest.push(i);
       }
-      await Promise.all(promises);
-      if (!isCanceled) {
-        setLoaded(true);
-        drawFrame(1);
-      }
+      await Promise.all(rest.map(loadOne));
     };
 
     loadImages();
@@ -64,15 +85,31 @@ export default function ScrollyCanvas({ children }: ScrollyCanvasProps) {
   }, []);
 
   const drawFrame = (index: number) => {
-    if (!canvasRef.current || !ctxRef.current || imagesRef.current.length === 0) return;
+    if (!canvasRef.current || !ctxRef.current) return;
     const canvas = canvasRef.current;
     const ctx = ctxRef.current;
 
-    // Use fallback array access gracefully
     const adjustedIndex = Math.max(0, Math.min(index - 1, FRAME_COUNT - 1));
-    const img = imagesRef.current[adjustedIndex];
+    let img = imagesRef.current[adjustedIndex];
+
+    // If this frame slot isn't loaded yet (sparse array during Phase 2),
+    // walk outward to find the nearest already-loaded frame
+    if (!img || !img.complete || img.naturalWidth === 0) {
+      for (let offset = 1; offset < FRAME_COUNT; offset++) {
+        const lo = adjustedIndex - offset;
+        const hi = adjustedIndex + offset;
+        if (lo >= 0) {
+          const candidate = imagesRef.current[lo];
+          if (candidate && candidate.complete && candidate.naturalWidth > 0) { img = candidate; break; }
+        }
+        if (hi < FRAME_COUNT) {
+          const candidate = imagesRef.current[hi];
+          if (candidate && candidate.complete && candidate.naturalWidth > 0) { img = candidate; break; }
+        }
+      }
+    }
+
     if (img && img.complete && img.naturalWidth > 0) {
-      // draw using cover strategy
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const ratio = Math.max(canvas.width / img.width, canvas.height / img.height);
       const newWidth = img.width * ratio;
@@ -128,7 +165,10 @@ export default function ScrollyCanvas({ children }: ScrollyCanvasProps) {
           <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#050505]/80 backdrop-blur-sm text-white/60 font-mono tracking-widest text-sm uppercase">
             <span className="mb-2 animate-pulse">Initializing Canvas Engine</span>
             <div className="h-0.5 w-48 bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full bg-white animate-pulse w-1/2"></div>
+              <div
+                className="h-full bg-white transition-all duration-200 ease-out"
+                style={{ width: `${loadProgress}%` }}
+              />
             </div>
           </div>
         )}
