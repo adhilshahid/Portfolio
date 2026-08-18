@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
-import { Cursor } from "@/components/ui/inverted-cursor";
+import { Cursor } from "@/components/ui/aurora-cursor";
 import LenisProvider from "@/components/LenisProvider";
 import Preloader from "@/components/Preloader";
 
