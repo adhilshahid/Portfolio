@@ -341,7 +341,7 @@ body {
    ========================================================================== */
 
 /* The custom cursor is driven entirely by framer-motion springs in
-   src/components/ui/aurora-cursor.tsx — no CSS keyframes required. */
+   src/components/ui/invert-cursor.tsx — no CSS keyframes required. */
 
 /* ==========================================================================
    SKILLS SPHERE — Holographic wireframe animations
