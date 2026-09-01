@@ -25,7 +25,13 @@ const OFFSCREEN_MARGIN = 50;
 
 const COUNT_DURATION = 2_400;
 const REDUCED_MOTION_DURATION = 600;
-const COMPLETION_HOLD = 280;
+const COMPLETION_HOLD = 200;
+
+const REVEAL_DURATION = 950;
+const REVEAL_REDUCED_DURATION = 400;
+const REVEAL_OVERSHOOT = 1.18;
+const REVEAL_FEATHER = 90;
+const REVEAL_WARP_BOOST = 7;
 
 interface Star {
   x: number;
@@ -48,6 +54,12 @@ function easeInOutQuint(value: number) {
   return value < 0.5
     ? 16 * value ** 5
     : 1 - (-2 * value + 2) ** 5 / 2;
+}
+
+function easeInOutCubic(value: number) {
+  return value < 0.5
+    ? 4 * value ** 3
+    : 1 - (-2 * value + 2) ** 3 / 2;
 }
 
 function createStar(
@@ -96,6 +108,7 @@ export default function Preloader() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [progress, setProgress] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
+  const [isRevealing, setIsRevealing] = useState(false);
   const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
@@ -116,10 +129,14 @@ export default function Preloader() {
     let stars: Star[] = [];
     let lastProgress = -1;
     let lastTime = performance.now();
+    let revealStartedAt = -1;
     const startTime = lastTime;
     const countDuration = prefersReducedMotion
       ? REDUCED_MOTION_DURATION
       : COUNT_DURATION;
+    const revealDuration = prefersReducedMotion
+      ? REVEAL_REDUCED_DURATION
+      : REVEAL_DURATION;
 
     const resize = () => {
       width = Math.max(1, window.innerWidth);
@@ -140,7 +157,11 @@ export default function Preloader() {
       );
     };
 
-    const drawFrame = (now: number, deltaTime: number) => {
+    const drawFrame = (
+      now: number,
+      deltaTime: number,
+      revealProgress: number,
+    ) => {
       const centerX = width / 2;
       const centerY = height / 2;
       const focalLength = Math.max(1, Math.min(width, height) * STAR_FOCAL);
@@ -151,9 +172,10 @@ export default function Preloader() {
       );
       const inverseFadeRange = 1 / fadeRange;
       const twinkleTime = now * 0.0015;
+      const warp = 1 + REVEAL_WARP_BOOST * revealProgress ** 2;
       const speedFactor = prefersReducedMotion
         ? 0
-        : deltaTime * STAR_SPEED * -0.7;
+        : deltaTime * STAR_SPEED * -0.7 * warp;
 
       context.globalCompositeOperation = "source-over";
       context.fillStyle = `rgba(0, 0, 0, ${1 - STAR_TRAIL})`;
@@ -207,12 +229,52 @@ export default function Preloader() {
       }
     };
 
+    const drawReveal = (revealProgress: number) => {
+      const eased = easeInOutCubic(revealProgress);
+      const maxRadius = Math.hypot(width, height) * 0.5 * REVEAL_OVERSHOOT;
+      const radius = eased * maxRadius;
+      if (radius <= 0.5) return;
+
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const feather = Math.min(REVEAL_FEATHER, radius);
+      const holeGradient = context.createRadialGradient(
+        centerX,
+        centerY,
+        radius - feather,
+        centerX,
+        centerY,
+        radius,
+      );
+      holeGradient.addColorStop(0, "rgba(0, 0, 0, 1)");
+      holeGradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+
+      context.globalCompositeOperation = "destination-out";
+      context.fillStyle = holeGradient;
+      context.fillRect(0, 0, width, height);
+      context.globalCompositeOperation = "source-over";
+    };
+
     const animate = (now: number) => {
       const deltaTime = Math.min(0.05, (now - lastTime) / 1_000);
       const elapsed = now - startTime;
       lastTime = now;
 
-      drawFrame(now, deltaTime);
+      if (revealStartedAt < 0 && elapsed >= countDuration + COMPLETION_HOLD) {
+        revealStartedAt = now;
+        setIsRevealing(true);
+      }
+
+      const revealProgress =
+        revealStartedAt < 0
+          ? 0
+          : saturate((now - revealStartedAt) / revealDuration);
+
+      drawFrame(now, deltaTime, revealProgress);
+
+      if (revealProgress > 0) {
+        drawReveal(revealProgress);
+      }
 
       const rawProgress = saturate(elapsed / countDuration);
       const nextProgress = Math.min(
@@ -225,7 +287,7 @@ export default function Preloader() {
         setProgress(nextProgress);
       }
 
-      if (elapsed >= countDuration + COMPLETION_HOLD) {
+      if (revealProgress >= 1) {
         setIsVisible(false);
         return;
       }
@@ -251,7 +313,7 @@ export default function Preloader() {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{
-            duration: prefersReducedMotion ? 0.2 : 0.55,
+            duration: prefersReducedMotion ? 0.2 : 0.25,
             ease: [0.22, 1, 0.36, 1],
           }}
           role="progressbar"
@@ -259,7 +321,12 @@ export default function Preloader() {
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={progress}
-          className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-black pointer-events-auto"
+          style={
+            isRevealing ? { backgroundColor: "transparent" } : undefined
+          }
+          className={`fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-black ${
+            isRevealing ? "pointer-events-none" : "pointer-events-auto"
+          }`}
         >
           <canvas
             ref={canvasRef}
@@ -270,11 +337,26 @@ export default function Preloader() {
           <motion.span
             aria-hidden="true"
             initial={{ opacity: 0, scale: 0.94, filter: "blur(10px)" }}
-            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-            transition={{
-              duration: prefersReducedMotion ? 0.15 : 0.6,
-              ease: [0.16, 1, 0.3, 1],
-            }}
+            animate={
+              isRevealing
+                ? {
+                    opacity: 0,
+                    scale: prefersReducedMotion ? 1 : 1.45,
+                    filter: "blur(18px)",
+                  }
+                : { opacity: 1, scale: 1, filter: "blur(0px)" }
+            }
+            transition={
+              isRevealing
+                ? {
+                    duration: prefersReducedMotion ? 0.2 : 0.5,
+                    ease: [0.4, 0, 0.2, 1],
+                  }
+                : {
+                    duration: prefersReducedMotion ? 0.15 : 0.6,
+                    ease: [0.16, 1, 0.3, 1],
+                  }
+            }
             className={`${counterFont.className} relative z-10 min-w-[3ch] select-none bg-[linear-gradient(110deg,#ffffff_10%,#dcfaff_38%,#f7f8f8_64%,#ffd9d2_100%)] bg-clip-text text-center text-[clamp(6rem,22vw,18rem)] font-black leading-none tracking-[0.01em] text-transparent tabular-nums drop-shadow-[0_0_28px_rgba(255,255,255,0.08)]`}
           >
             {String(progress).padStart(2, "0")}
