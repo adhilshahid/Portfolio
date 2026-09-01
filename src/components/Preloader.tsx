@@ -23,9 +23,9 @@ const Z_NEAR = 0.12;
 const Z_FAR = 0.98;
 const OFFSCREEN_MARGIN = 50;
 
-const COUNT_DURATION = 4_000;
-const REDUCED_MOTION_DURATION = 800;
-const COMPLETION_HOLD = 450;
+const COUNT_DURATION = 2_400;
+const REDUCED_MOTION_DURATION = 600;
+const COMPLETION_HOLD = 280;
 
 interface Star {
   x: number;
@@ -251,7 +251,7 @@ export default function Preloader() {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{
-            duration: prefersReducedMotion ? 0.2 : 0.8,
+            duration: prefersReducedMotion ? 0.2 : 0.55,
             ease: [0.22, 1, 0.36, 1],
           }}
           role="progressbar"
@@ -272,7 +272,7 @@ export default function Preloader() {
             initial={{ opacity: 0, scale: 0.94, filter: "blur(10px)" }}
             animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
             transition={{
-              duration: prefersReducedMotion ? 0.15 : 0.9,
+              duration: prefersReducedMotion ? 0.15 : 0.6,
               ease: [0.16, 1, 0.3, 1],
             }}
             className={`${counterFont.className} relative z-10 min-w-[3ch] select-none bg-[linear-gradient(110deg,#ffffff_10%,#dcfaff_38%,#f7f8f8_64%,#ffd9d2_100%)] bg-clip-text text-center text-[clamp(6rem,22vw,18rem)] font-black leading-none tracking-[0.01em] text-transparent tabular-nums drop-shadow-[0_0_28px_rgba(255,255,255,0.08)]`}
