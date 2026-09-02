@@ -8,8 +8,19 @@ const counterFont = localFont({
   src: "../fonts/helsinkixxl-black.otf",
   weight: "900",
   style: "normal",
-  display: "swap",
+  display: "block",
 });
+
+// The face is drawn with no sidebearings (ink width == advance for every
+// digit), so an even inter-digit gap has to be set explicitly. A uniform slot
+// would strand the narrow "1" (0.30em advance vs 0.49em for the rest) in a
+// hole 3.6x wider than the gap between any other pair.
+const DIGIT_GAP = "0.045em";
+
+// The numerals' ink spans 8%–81.4% of the line box, so the gradient stops are
+// mapped into that band rather than the full box.
+const COUNTER_GRADIENT =
+  "linear-gradient(180deg,#ffffff 8%,#ffffff 48%,#ffd9c9 61%,#ff6b35 73%,#ff0080 81%)";
 
 const STAR_COUNT = 500;
 const STAR_SPEED = 0.4;
@@ -357,9 +368,15 @@ export default function Preloader() {
                     ease: [0.16, 1, 0.3, 1],
                   }
             }
-            className={`${counterFont.className} relative z-10 min-w-[3ch] select-none bg-[linear-gradient(110deg,#ffffff_10%,#dcfaff_38%,#f7f8f8_64%,#ffd9d2_100%)] bg-clip-text text-center text-[clamp(6rem,22vw,18rem)] font-black leading-none tracking-[0.01em] text-transparent tabular-nums drop-shadow-[0_0_28px_rgba(255,255,255,0.08)]`}
+            style={{ backgroundImage: COUNTER_GRADIENT, gap: DIGIT_GAP }}
+            className={`${counterFont.className} relative z-10 flex w-[1.4em] select-none items-baseline justify-center bg-clip-text text-[clamp(6rem,22vw,18rem)] leading-none text-transparent`}
           >
-            {String(progress).padStart(2, "0")}
+            {String(progress)
+              .padStart(2, "0")
+              .split("")
+              .map((digit, index) => (
+                <span key={index}>{digit}</span>
+              ))}
           </motion.span>
         </motion.div>
       )}
