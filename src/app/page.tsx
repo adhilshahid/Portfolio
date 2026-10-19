@@ -5,6 +5,7 @@ import About from '@/components/About';
 import Experience from '@/components/Experience';
 import SkillsSphere from '@/components/SkillsSphere';
 import Certificates from '@/components/Certificates';
+import Contact from '@/components/Contact';
 
 export default function Home() {
   return (
@@ -16,6 +17,7 @@ export default function Home() {
       <Experience />
       <SkillsSphere />
       <Certificates />
+      <Contact />
       <NanoBanana />
     </main>
   );
