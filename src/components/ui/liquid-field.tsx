@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 
-const BLOB_COUNT = 8;
+const BLOB_COUNT = 6;
 const MAX_GLASS = 8;
 
 export interface LiquidGlass {
@@ -27,9 +27,10 @@ void main() {
   gl_Position = vec4(aPos, 0.0, 1.0);
 }`;
 
-// Metaball field: each blob contributes r²/d². Where the sum crosses 1 the
-// surface is drawn as glossy liquid — the field's gradient doubles as a
-// surface normal for diffuse + specular light; below 1 it fades into a glow.
+// Metaball field: each blob contributes (r²/d²)². Where the sum crosses 1 the
+// surface is drawn as glossy liquid; below 1 it fades into a glow. Squaring
+// the classic r²/d² kernel shortens its reach, so drops keep their round shape
+// and only bridge when they actually touch.
 //
 // Glass panes are refracted here too, analytically: inside a pane's rounded
 // rect, pixels near the rim sample the field from further inward (a convex
@@ -80,10 +81,11 @@ void main() {
     if (b.z <= 0.5) continue;
     vec2 d = q - b.xy;
     float d2 = dot(d, d) + 1.0;
-    float k = (b.z * b.z) / d2;
+    float s = (b.z * b.z) / d2;
+    float k = s * s;
     field += k;
     color += uColors[i] * k;
-    grad -= 2.0 * k * d / d2;
+    grad -= 4.0 * k * d / d2;
   }
 
   color /= max(field, 1e-4);
@@ -95,12 +97,13 @@ void main() {
   float soft = min(slope * (0.8 + frost), 0.9);
   float surface = smoothstep(1.0 - soft, 1.0 + soft, field);
 
-  // Shade a dome rather than the raw field: for a lone drop, field = r²/d², so
-  // sqrt(1 - 1/field) is exactly a hemisphere's height. Its slope fades to 0
-  // at the centre, where the raw field's slope spikes and pinches into a dark
-  // point; merged drops blend into one smooth surface.
-  float height = sqrt(clamp(1.0 - 1.0 / max(field, 1.0), 0.0, 1.0));
-  vec2 slopeH = grad / (2.0 * max(height, 0.04) * field * field);
+  // Shade a dome rather than the raw field: for a lone drop, field = r⁴/d⁴, so
+  // sqrt(1 - 1/sqrt(field)) is exactly a hemisphere's height. Its slope fades
+  // to 0 at the centre, where the raw field's slope spikes and pinches into a
+  // dark point; merged drops blend into one smooth surface.
+  float f = max(field, 1.0);
+  float height = sqrt(clamp(1.0 - inversesqrt(f), 0.0, 1.0));
+  vec2 slopeH = grad * 0.25 * inversesqrt(f * f * f) / max(height, 0.04);
   vec3 n = normalize(vec3(-slopeH * uNormalScale, 1.0));
 
   vec3 light = normalize(vec3(-0.45, 0.65, 0.9));
@@ -115,7 +118,7 @@ void main() {
   // Bright, even body with a lighter core — a lit, slightly translucent liquid.
   vec3 body = color * (0.78 + 0.25 * diffuse) * mix(0.92, 1.12, height);
   vec3 liquid = body + fresnel * mix(color, vec3(1.0), 0.35) * 0.45 + sheen + specular;
-  float glow = smoothstep(0.12, 1.0, field) * 0.28;
+  float glow = smoothstep(0.12, 1.0, sqrt(field)) * 0.28;
 
   // Premultiplied alpha.
   vec3 rgb = mix(color * glow, liquid, surface);
@@ -157,12 +160,9 @@ const AMBIENT: Omit<Drop, 'x' | 'y' | 'vx' | 'vy'>[] = [
   { hx: 0.9, hy: 0.84, ax: 0.06, ay: 0.06, sx: 0.12, sy: 0.2, phase: 5.2, size: 0.7, color: hex('#38BDF8') },
 ];
 
-const CURSOR_COLOR = hex('#FF3D8B');
-const TAIL_COLOR = hex('#FF6B35');
-
-/** How far (px) the cursor's pull reaches, and how strongly drops lean toward it. */
-const PULL_RADIUS = 280;
-const PULL_STRENGTH = 0.38;
+/** How far (px) the pointer's pull reaches, and how strongly drops lean toward it. */
+const PULL_RADIUS = 360;
+const PULL_STRENGTH = 0.45;
 
 /** Product of inline opacities up to `root`, so panes fading in refract in step. */
 function visibleOpacity(el: HTMLElement, root: HTMLElement) {
@@ -188,10 +188,8 @@ function compile(gl: WebGL2RenderingContext, type: number, source: string) {
 }
 
 /**
- * A field of glossy liquid drops that drift on their own and are drawn toward
- * the pointer; the pointer carries its own drop (plus a lagging tail, so fast
- * moves stretch the liquid) that merges with whatever it passes. Pressing
- * swells it.
+ * A field of glossy liquid drops that drift on their own and lean toward the
+ * pointer as it passes nearby.
  */
 export default function LiquidField({ className = '' }: { className?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -234,8 +232,6 @@ export default function LiquidField({ className = '' }: { className?: string }) 
 
     const colors = new Float32Array(BLOB_COUNT * 3);
     AMBIENT.forEach((d, i) => colors.set(d.color, i * 3));
-    colors.set(CURSOR_COLOR, 6 * 3);
-    colors.set(TAIL_COLOR, 7 * 3);
     gl.uniform3fv(uColors, colors);
 
     const blobs = new Float32Array(BLOB_COUNT * 3);
@@ -247,9 +243,7 @@ export default function LiquidField({ className = '' }: { className?: string }) 
     let base = 80;
 
     const drops: Drop[] = AMBIENT.map((d) => ({ ...d, x: 0, y: 0, vx: 0, vy: 0 }));
-    const cursor = { x: 0, y: 0, vx: 0, vy: 0, r: 0 };
-    const tail = { x: 0, y: 0, vx: 0, vy: 0, r: 0 };
-    const pointer = { clientX: -1e4, clientY: -1e4, inside: false, pressed: false };
+    const pointer = { clientX: -1e4, clientY: -1e4, inside: false };
     let placed = false;
 
     const resize = () => {
@@ -267,8 +261,6 @@ export default function LiquidField({ className = '' }: { className?: string }) 
           d.x = d.hx * width;
           d.y = d.hy * height;
         });
-        cursor.x = tail.x = width / 2;
-        cursor.y = tail.y = height / 2;
         placed = true;
       }
     };
@@ -280,20 +272,10 @@ export default function LiquidField({ className = '' }: { className?: string }) 
       pointer.clientX = e.clientX;
       pointer.clientY = e.clientY;
     };
-    const onPointerDown = () => {
-      pointer.pressed = true;
-    };
-    const onPointerUp = () => {
-      pointer.pressed = false;
-    };
     const onPointerLeave = () => {
       pointer.clientX = pointer.clientY = -1e4;
-      pointer.pressed = false;
     };
     window.addEventListener('pointermove', onPointerMove, { passive: true });
-    window.addEventListener('pointerdown', onPointerDown, { passive: true });
-    window.addEventListener('pointerup', onPointerUp, { passive: true });
-    window.addEventListener('pointercancel', onPointerUp, { passive: true });
     document.documentElement.addEventListener('pointerleave', onPointerLeave);
 
     let frame = 0;
@@ -336,24 +318,11 @@ export default function LiquidField({ className = '' }: { className?: string }) 
           tx += dx * PULL_STRENGTH * falloff;
           ty += dy * PULL_STRENGTH * falloff;
         }
-        spring(d, tx, ty, 0.012, 0.9, dt);
+        spring(d, tx, ty, 0.018, 0.9, dt);
         blobs[i * 3] = d.x * dpr;
         blobs[i * 3 + 1] = (height - d.y) * dpr;
         blobs[i * 3 + 2] = d.size * base * dpr;
       });
-
-      const targetR = pointer.inside ? base * (pointer.pressed ? 1.25 : 0.82) : 0;
-      cursor.r += (targetR - cursor.r) * Math.min(1, 0.12 * dt);
-      if (pointer.inside) spring(cursor, px, py, 0.09, 0.72, dt);
-      spring(tail, cursor.x, cursor.y, 0.035, 0.8, dt);
-      tail.r = cursor.r * 0.62;
-
-      blobs[18] = cursor.x * dpr;
-      blobs[19] = (height - cursor.y) * dpr;
-      blobs[20] = cursor.r * dpr;
-      blobs[21] = tail.x * dpr;
-      blobs[22] = (height - tail.y) * dpr;
-      blobs[23] = tail.r * dpr;
 
       // Panes are re-measured every frame so hover scaling, entrance
       // animations and smooth scrolling all stay in register.
@@ -418,9 +387,6 @@ export default function LiquidField({ className = '' }: { className?: string }) 
       resizeObserver.disconnect();
       document.removeEventListener('visibilitychange', sync);
       window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerdown', onPointerDown);
-      window.removeEventListener('pointerup', onPointerUp);
-      window.removeEventListener('pointercancel', onPointerUp);
       document.documentElement.removeEventListener('pointerleave', onPointerLeave);
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);

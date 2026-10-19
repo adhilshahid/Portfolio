@@ -345,12 +345,7 @@ function ContactForm() {
           transition={{ duration: 0.35, ease: EASE_OUT }}
           className="flex flex-col gap-5"
         >
-          <div>
-            <h3 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Send a message</h3>
-            <p className="mt-1.5 text-sm text-white/60">
-              It goes straight to my inbox, and I reply from {EMAIL}.
-            </p>
-          </div>
+          <h3 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Send a message</h3>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Name" name="name" error={errors.name}>
@@ -487,10 +482,7 @@ export default function Contact() {
             Let&apos;s talk
           </span>
         </h2>
-        <p className="mx-auto max-w-lg text-sm leading-relaxed text-zinc-500 md:text-base">
-          Hiring for a network or cloud role, or have something that needs building? I&apos;d like to
-          hear about it.
-        </p>
+
       </motion.header>
 
       <div className="relative py-14 md:py-20">
