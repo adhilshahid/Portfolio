@@ -89,19 +89,32 @@ void main() {
   color /= max(field, 1e-4);
 
   // The field changes by |grad| per pixel near the surface, so a blur of
-  // 'frost' px is a smoothstep that wide in field units.
+  // 'frost' px is a smoothstep that wide in field units. Capped, because the
+  // slope spikes at each drop's centre and would otherwise punch a dark hole.
   float slope = length(grad);
-  float soft = slope * (0.8 + frost);
+  float soft = min(slope * (0.8 + frost), 0.9);
   float surface = smoothstep(1.0 - soft, 1.0 + soft, field);
 
-  vec3 n = normalize(vec3(-grad * uNormalScale, 1.0));
-  vec3 light = normalize(vec3(-0.45, 0.65, 0.9));
-  float diffuse = clamp(dot(n, light), 0.0, 1.0);
-  float specular = pow(clamp(dot(reflect(-light, n), vec3(0.0, 0.0, 1.0)), 0.0, 1.0), 36.0);
-  specular *= 1.0 - clamp(frost / 24.0, 0.0, 0.75);
-  float fresnel = pow(1.0 - n.z, 2.0);
+  // Shade a dome rather than the raw field: for a lone drop, field = r²/d², so
+  // sqrt(1 - 1/field) is exactly a hemisphere's height. Its slope fades to 0
+  // at the centre, where the raw field's slope spikes and pinches into a dark
+  // point; merged drops blend into one smooth surface.
+  float height = sqrt(clamp(1.0 - 1.0 / max(field, 1.0), 0.0, 1.0));
+  vec2 slopeH = grad / (2.0 * max(height, 0.04) * field * field);
+  vec3 n = normalize(vec3(-slopeH * uNormalScale, 1.0));
 
-  vec3 liquid = color * (0.45 + 0.6 * diffuse) + fresnel * color * 0.6 + specular * 0.9;
+  vec3 light = normalize(vec3(-0.45, 0.65, 0.9));
+  vec3 view = vec3(0.0, 0.0, 1.0);
+  float diffuse = clamp(dot(n, light), 0.0, 1.0);
+  float facing = clamp(dot(reflect(-light, n), view), 0.0, 1.0);
+  float gloss = 1.0 - clamp(frost / 24.0, 0.0, 0.75);
+  float sheen = pow(facing, 6.0) * 0.22 * gloss;
+  float specular = pow(facing, 70.0) * 0.85 * gloss;
+  float fresnel = pow(1.0 - n.z, 2.5) * gloss;
+
+  // Bright, even body with a lighter core — a lit, slightly translucent liquid.
+  vec3 body = color * (0.78 + 0.25 * diffuse) * mix(0.92, 1.12, height);
+  vec3 liquid = body + fresnel * mix(color, vec3(1.0), 0.35) * 0.45 + sheen + specular;
   float glow = smoothstep(0.12, 1.0, field) * 0.28;
 
   // Premultiplied alpha.
@@ -248,7 +261,7 @@ export default function LiquidField({ className = '' }: { className?: string }) 
       canvas.height = Math.max(1, Math.round(height * dpr));
       gl.viewport(0, 0, canvas.width, canvas.height);
       base = Math.min(130, Math.max(56, Math.min(width, height) * 0.13));
-      gl.uniform1f(uNormalScale, base * dpr * 0.55);
+      gl.uniform1f(uNormalScale, base * dpr * 0.9);
       if (!placed && width > 0) {
         drops.forEach((d) => {
           d.x = d.hx * width;
