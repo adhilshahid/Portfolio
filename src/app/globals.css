@@ -427,6 +427,49 @@ body {
 
 .lg-surface--panel {
   --lg-tint: 0.42;
+  transition: box-shadow 500ms ease;
+}
+
+/* Hovering (or focusing) Send floods the whole card with colour. */
+.lg-surface--panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(75% 85% at 0% 0%, rgba(255, 0, 128, 0.95), transparent 72%),
+    radial-gradient(70% 80% at 100% 5%, rgba(124, 92, 255, 0.9), transparent 72%),
+    radial-gradient(75% 85% at 100% 100%, rgba(255, 107, 53, 0.95), transparent 72%),
+    radial-gradient(70% 75% at 0% 100%, rgba(56, 189, 248, 0.85), transparent 72%),
+    linear-gradient(135deg, rgba(255, 0, 128, 0.4), rgba(255, 107, 53, 0.4));
+  background-size: 140% 140%;
+  background-position: 0% 0%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 500ms ease;
+}
+
+.lg-surface--panel:has(.lg-cta:not(:disabled):hover)::after,
+.lg-surface--panel:has(.lg-cta:focus-visible)::after {
+  opacity: 1;
+  animation: lgPanelFlow 6s ease-in-out infinite alternate;
+}
+
+.lg-surface--panel:has(.lg-cta:not(:disabled):hover),
+.lg-surface--panel:has(.lg-cta:focus-visible) {
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 0 0 rgba(255, 255, 255, 0.18),
+    inset 0 0 22px 0 rgba(255, 255, 255, 0.08),
+    0 24px 60px -20px rgba(0, 0, 0, 0.75),
+    0 0 70px -10px rgba(255, 0, 128, 0.55),
+    0 0 120px -30px rgba(255, 107, 53, 0.5);
+}
+
+@keyframes lgPanelFlow {
+  from { background-position: 0% 0%; }
+  to { background-position: 100% 100%; }
 }
 
 /* Rim light: bright where the light source hits, fading round the sides. */
@@ -560,5 +603,9 @@ body {
   .lg-press:active {
     transition: none;
     transform: none;
+  }
+
+  .lg-surface--panel::after {
+    animation: none !important;
   }
 }

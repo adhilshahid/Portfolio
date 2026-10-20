@@ -1,6 +1,6 @@
 import ScrollyCanvas from '@/components/ScrollyCanvas';
 import Overlay from '@/components/Overlay';
-import NanoBanana from '@/components/NanoBanana';
+import TraceRoute from '@/components/TraceRoute';
 import About from '@/components/About';
 import Experience from '@/components/Experience';
 import SkillsSphere from '@/components/SkillsSphere';
@@ -18,7 +18,7 @@ export default function Home() {
       <SkillsSphere />
       <Certificates />
       <Contact />
-      <NanoBanana />
+      <TraceRoute />
     </main>
   );
 }
