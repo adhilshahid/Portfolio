@@ -6,6 +6,7 @@ import { motion, useInView } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 import EventMesh from './projects/EventMesh';
 import CloudFlowPipeline from './projects/CloudFlowPipeline';
+import ComplianceCheck from './projects/ComplianceCheck';
 import { displayFont, monoFont } from './projects/fonts';
 
 /* ─── Types ─────────────────────────────────────────────────── */
@@ -13,7 +14,7 @@ interface Project {
   slug: string;
   name: string;
   kicker: string;
-  year: string;
+  year?: string;
   summary: string;
   stack: string[];
   repo?: string;
@@ -34,6 +35,15 @@ const projects: Project[] = [
     stack: ['Lambda', 'S3', 'SQS', 'SNS', 'CloudWatch', 'Python', 'OpenRouter'],
     repo: 'https://github.com/adhilshahid/CloudFlow-Invoice-AI',
     media: <CloudFlowPipeline />,
+  },
+  {
+    slug: 'network-config-compliance',
+    name: 'Network Config Compliance Automation',
+    kicker: 'Network Automation · Python',
+    summary:
+      'Backs up Cisco SD-WAN and Aruba configs over SSH and the vManage API, normalises them per store, validates every interface against expected subnets, helpers, VRRP and security zones, and appends auditable PASS/FAIL rows to Excel.',
+    stack: ['Python', 'Netmiko', 'vManage API', 'pandas', 'openpyxl', 'PowerShell'],
+    media: <ComplianceCheck />,
   },
 ];
 
@@ -66,8 +76,12 @@ function ProjectCase({ project }: { project: Project }) {
         <div>
           <p className={`${monoFont.className} mb-3 flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-zinc-500`}>
             <span>{project.kicker}</span>
-            <span className="h-px w-6 bg-zinc-700" aria-hidden="true" />
-            <span>{project.year}</span>
+            {project.year && (
+              <>
+                <span className="h-px w-6 bg-zinc-700" aria-hidden="true" />
+                <span>{project.year}</span>
+              </>
+            )}
           </p>
           <h3
             id={`${project.slug}-title`}
