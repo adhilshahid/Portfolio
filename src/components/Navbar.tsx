@@ -3,16 +3,28 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import { House, User, Briefcase, Wrench, FolderKanban, Award, Mail, type LucideIcon } from 'lucide-react';
 
 import { useLenis } from 'lenis/react';
 
 const navLinks = ['Home', 'About', 'Experience', 'Skill', 'Project', 'Certification', 'Contact'];
+
+const navIcons: Record<string, LucideIcon> = {
+  Home: House,
+  About: User,
+  Experience: Briefcase,
+  Skill: Wrench,
+  Project: FolderKanban,
+  Certification: Award,
+  Contact: Mail,
+};
 
 export default function Navbar() {
   const lenis = useLenis();
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('Home');
   const [isMobile, setIsMobile] = useState(false);
+  const [isCompact, setIsCompact] = useState(false);
   const isScrolledRef = useRef(false);
 
   // Handle scroll to transform navbar
@@ -38,7 +50,10 @@ export default function Navbar() {
 
   // Track viewport width for mobile detection (avoids SSR-unsafe window.innerWidth in render)
   useEffect(() => {
-    const updateMobile = () => setIsMobile(window.innerWidth < 1024);
+    const updateMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+      setIsCompact(window.innerWidth < 640);
+    };
     updateMobile();
     window.addEventListener('resize', updateMobile);
     return () => window.removeEventListener('resize', updateMobile);
@@ -103,13 +118,14 @@ export default function Navbar() {
 
   const renderNavItems = (isTopPosition = false) => {
     const heightClass = isTopPosition ? "h-[48px] sm:h-[54px]" : "h-[64px] sm:h-[70px]";
-    const padding = isTopPosition ? "0 12px" : "0 20px";
+    const iconOnly = !isTopPosition && isCompact;
+    const padding = isTopPosition ? "0 12px" : iconOnly ? "0 11px" : isMobile ? "0 14px" : "0 20px";
     const textClass = isTopPosition ? "text-[10px]" : "text-[11px] sm:text-xs";
     
     return (
-    <fieldset className={`nav-glass pointer-events-auto ${heightClass}`}>
+    <fieldset className={`nav-glass pointer-events-auto min-w-0 max-w-full ${heightClass}`}>
       <legend className="switcher__legend">Navigation Menu</legend>
-      <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar snap-x h-full relative z-[5]">
+      <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar snap-x h-full min-w-0 relative z-[5]">
         {navLinks.map((item) => {
           const isActive = activeSection === item;
           // Apply active item styling purely via React instead of raw CSS input matching
@@ -124,7 +140,10 @@ export default function Navbar() {
               aria-label={`Navigate to ${item}`}
             >
               <span className={`relative z-10 transition-transform duration-300 group-hover:scale-105 inline-block ${textClass}`}>
-                {item}
+                {iconOnly ? (() => {
+                  const Icon = navIcons[item];
+                  return <Icon size={20} strokeWidth={isActive ? 2.5 : 2} aria-hidden="true" className="block" />;
+                })() : item}
               </span>
 
               {isActive && (
@@ -256,7 +275,7 @@ export default function Navbar() {
             initial={false}
             animate={{ y: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="pointer-events-auto flex items-center rounded-[50px] max-w-full relative"
+            className="pointer-events-auto flex items-center             rounded-[50px] max-w-full min-w-0 relative"
           >
             {renderNavItems(false)}
           </motion.nav>
