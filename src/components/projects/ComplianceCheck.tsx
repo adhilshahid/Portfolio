@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useReducedMotionSafe } from './useReducedMotionSafe';
 import { monoFont } from './fonts';
 
 /* ─── Model ─────────────────────────────────────────────────── */
@@ -88,7 +89,7 @@ const HOLD_MS = 3400;
 
 /* ─── Demo ──────────────────────────────────────────────────── */
 export default function ComplianceCheck() {
-  const reduceMotion = useReducedMotion() ?? false;
+  const reduceMotion = useReducedMotionSafe();
   const [inView, setInView] = useState(false);
   const [sampleIdx, setSampleIdx] = useState(0);
   const [tick, setTick] = useState(-1);

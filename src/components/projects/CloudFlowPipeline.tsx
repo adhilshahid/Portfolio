@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useId, useMemo, useState, useSyncExternalStore } from 'react';
 import type { ReactNode } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useReducedMotionSafe } from './useReducedMotionSafe';
 import { FileWarning, FileText } from 'lucide-react';
 import { monoFont } from './fonts';
 
@@ -333,7 +334,7 @@ function Packet({
 /* ─── Demo ──────────────────────────────────────────────────── */
 export default function CloudFlowPipeline() {
   const [inView, setInView] = useState(false);
-  const reduceMotion = useReducedMotion() ?? false;
+  const reduceMotion = useReducedMotionSafe();
   const isWide = useIsWide();
   const layout = isWide ? WIDE : NARROW;
   const uid = useId().replace(/:/g, '');

@@ -7,6 +7,7 @@ import { ArrowUpRight } from 'lucide-react';
 import EventMesh from './projects/EventMesh';
 import CloudFlowPipeline from './projects/CloudFlowPipeline';
 import ComplianceCheck from './projects/ComplianceCheck';
+import RequestTrace from './projects/RequestTrace';
 import { displayFont, monoFont } from './projects/fonts';
 
 /* ─── Types ─────────────────────────────────────────────────── */
@@ -44,6 +45,16 @@ const projects: Project[] = [
       'Backs up Cisco SD-WAN and Aruba configs over SSH and the vManage API, normalises them per store, validates every interface against expected subnets, helpers, VRRP and security zones, and appends auditable PASS/FAIL rows to Excel.',
     stack: ['Python', 'Netmiko', 'vManage API', 'pandas', 'openpyxl', 'PowerShell'],
     media: <ComplianceCheck />,
+  },
+  {
+    slug: 'campquest',
+    name: 'CampQuest',
+    kicker: 'Full-Stack · Node.js',
+    summary:
+      'Full-stack campground review app with RESTful routes, Passport authentication, author-only edit and delete, Joi validation, flash messages and cascading review cleanup in MongoDB.',
+    stack: ['Node.js', 'Express', 'MongoDB', 'Mongoose', 'Passport', 'Joi', 'EJS', 'Bootstrap'],
+    repo: 'https://github.com/adhilshahid/CampQuest',
+    media: <RequestTrace />,
   },
 ];
 
@@ -174,7 +185,7 @@ export default function Projects() {
             <span className="bg-gradient-to-r from-[#FF0080] to-[#FF6B35] bg-clip-text text-transparent">Projects</span>
           </p>
           <p className="mx-auto max-w-lg text-sm leading-relaxed text-zinc-500 md:text-base">
-            Cloud systems I&apos;ve designed and built end to end.
+            Cloud, network and web systems I&apos;ve designed and built end to end.
           </p>
         </motion.div>
 
