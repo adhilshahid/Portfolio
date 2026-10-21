@@ -19,7 +19,7 @@ export const SKILLS: Skill[] = [
   { name: 'Aruba Networks', icon: '/svg/aruba.svg' },
   { name: 'Cisco', icon: '/svg/cisco.svg' },
   { name: 'Fortinet', icon: '/svg/fortinet.svg' },
-  { name: 'Wireless', icon: '/svg/wireless.svg' },
+  { name: 'Wireless', icon: '/images/wireless.png' },
   { name: 'Infoblox', icon: '/svg/infoblox.svg' },
   { name: 'UltraDNS', icon: '/svg/ultradns.svg' },
   { name: 'HPE ClearPass', icon: '/svg/clearpass.svg' },
@@ -34,7 +34,7 @@ export const SKILLS: Skill[] = [
   { name: 'MySQL', icon: '/svg/mysql.svg' },
   { name: 'Git', icon: '/svg/git.svg' },
   { name: 'GitHub', icon: '/svg/github.svg' },
-  { name: 'ServiceNow', icon: '/svg/servicenow.svg' },
+  { name: 'ServiceNow', icon: '/images/servicenow.png' },
   { name: 'Splunk', icon: '/svg/splunk.svg' },
   { name: 'New Relic', icon: '/svg/newrelic.svg' },
 ];
